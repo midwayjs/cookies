@@ -1,6 +1,8 @@
 # Midway Cookies
 
-Extends [pillarjs/cookies](https://github.com/pillarjs/cookies) to adapt koa and egg with some additional features.
+Extends [pillarjs/cookies](https://github.com/pillarjs/cookies) and Egg Cookies to adapt koa and serverless with some additional features.
+
+More encryption than the original version, using a more secure aes-256-gcm algorithm.
 
 ## Encrypt
 
@@ -8,30 +10,37 @@ Extends [pillarjs/cookies](https://github.com/pillarjs/cookies) to adapt koa and
 
 ```ts
 import * as Cookies from '@midwayjs/cookies');
-
-const cookies = new Cookies(ctx, keys[, defaultCookieOptions]);
-
-cookies.set('foo', 'bar', { encrypt: true });
-cookies.get('foo', { encrypt: true });
+ctx.cookies = new Cookies(ctx, keys[, defaultCookieOptions]);
+ctx.cookies.set('foo', 'bar', { encrypt: true });
+ctx.cookies.get('foo', { encrypt: true });
 ```
 
 **Note: you should both indicating in get and set in pairs.**
 
-## Cookie Length Check
+## Set cookie
 
-[Browsers all had some limitation in cookie's length](http://browsercookielimits.squawky.net/), so if set a cookie with an extremely long value(> 4093), egg-cookies will emit an `cookieLimitExceed` event. You can listen to this event and record.
+Set a cookie through `cookies.set(key, value, options)`. The parameters supported by options are:
 
-```ts
-import * as Cookies from '@midwayjs/cookies');
+- path - The valid path of the `String` cookie, the default is `/`.
+- domain - The valid domain name range of `String` cookie, the default is `undefined`.
+- expires - the expiration time of the `Date` cookie.
+- maxAge - the maximum valid time of the `Number` cookie. If maxAge is set, the value of expires will be overwritten.
+- secure - Whether `Boolean` is only transmitted in an encrypted channel. Note that if the request is http, it is not allowed to be set to true. If https is automatically set to true.
+- httpOnly - `Boolean` If set to true, the browser is not allowed to read the value of this cookie.
+- overwrite - `Boolean` If set to true, repeatedly writing the same key on a request will overwrite the previous value written, the default is false.
+- signed - Whether `Boolean` needs to sign the cookie or not, the signed parameter needs to be passed when cooperating with get. At this time, the front-end cannot tamper with the cookie. The default is true.
+- encrypt - Whether `Boolean` needs to encrypt the cookie, you need to pass the encrypt parameter when using get. At this time, the front-end cannot read the real cookie value, and the default is false.
 
-const cookies = new Cookies(ctx, keys);
+## Read cookie
 
-cookies.on('cookieLimitExceed', { name, value } => {
-  // log
-});
+Read a cookie through `cookies.get(key, value, options)`. The parameters supported by options are:
 
-cookies.set('foo', longText);
-```
+- signed - Whether `Boolean` needs to verify the cookie, and pass the signed parameter when cooperating with the set. At this time, the front-end cannot tamper with the cookie. The default is true.
+- encrypt - Whether `Boolean` needs to decrypt the cookie, and pass the encrypt parameter when cooperating with the set. At this time, the front-end cannot read the real cookie value, and the default is false.
+
+## Delete cookie
+
+Use `cookie.set(key, null)` to delete a cookie. If the `signed` parameter is passed, the signature will also be deleted.
 
 ## License
 
