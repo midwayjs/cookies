@@ -57,6 +57,18 @@ describe('test/keygrip.test.ts', () => {
     assert(keygrip.verify('hello', signed) === 0);
     assert(newKeygrip.verify('hello', signed) === -1);
   });
+
+  it('should test encrypt error', function () {
+    const keygrip = new Keygrip([ 'foo', 'bar' ]);
+    const encrypted = keygrip.encrypt('hello', {});
+    expect(encrypted).toBeUndefined();
+  });
+
+  it('should test decrypt error', function () {
+    const keygrip = new Keygrip([ 'foo', 'bar' ]);
+    const value = keygrip.decrypt('hello');
+    expect(value.value).toBeUndefined();
+  });
 });
 
 function shouldThrow(fn) {
