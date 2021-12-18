@@ -1,9 +1,9 @@
 import * as assert from 'assert';
-import { Cookies } from '../src';
+import { CreateCookie } from './util';
 
-describe('test/lib/cookies.test.js', () => {
+describe('test/cookies.test.ts', () => {
   it('should encrypt error when keys not present', () => {
-    const cookies = new Cookies({}, { keys: null });
+    const cookies = CreateCookie({}, { keys: null });
     try {
       cookies.set('foo', 'bar', { encrypt: true });
       throw new Error('should not exec');
@@ -13,30 +13,30 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should not thrown when keys not present and do not use encrypt or sign', () => {
-    const cookies = new Cookies({}, { keys: null });
+    const cookies = CreateCookie({}, { keys: null });
     cookies.set('foo', 'bar', { encrypt: false, signed: false });
   });
 
   it('should encrypt ok', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar', { encrypt: true });
     const cookie = cookies.ctx.response.headers['set-cookie'][0];
     cookies.ctx.request.headers.cookie = cookie;
     const value = cookies.get('foo', { encrypt: true });
-    assert(value, 'bar');
-    assert(cookie.indexOf('bar') === -1);
+    expect(value).toEqual('bar');
+    expect(cookie.indexOf('bar')).toEqual(-1);
   });
 
   it('should cache eygrip', () => {
     const keys = [ 'key' ];
-    assert(new Cookies({}, { keys }).keys === new Cookies({}, { keys }).keys); // eslint-disable-line no-self-compare
+    assert(CreateCookie({}, { keys }).keys === CreateCookie({}, { keys }).keys); // eslint-disable-line no-self-compare
   });
 
   it('should encrypt failed return undefined', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar', { encrypt: true });
     const cookie = cookies.ctx.response.headers['set-cookie'][0];
-    const newCookies = new Cookies({
+    const newCookies = CreateCookie({
       headers: { cookie },
     }, { keys: [ 'another key' ] });
     const value = newCookies.get('foo', { encrypt: true });
@@ -44,7 +44,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should disable signed when encrypt enable', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar', { encrypt: true, signed: true });
     const cookie = cookies.ctx.response.headers['set-cookie'].join(';');
     cookies.ctx.request.headers.cookie = cookie;
@@ -55,7 +55,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should work with secure ok', () => {
-    const cookies = new Cookies({}, {
+    const cookies = CreateCookie({}, {
       secure: true,
     });
     cookies.set('foo', 'bar', { encrypt: true });
@@ -64,7 +64,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should signed work fine', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar', { signed: true });
     const cookie = cookies.ctx.response.headers['set-cookie'].join(';');
     assert(cookie.indexOf('foo=bar') >= 0);
@@ -80,19 +80,19 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should return undefined when header.cookie not exists', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     assert(cookies.get('hello') === undefined);
   });
 
   it('should return undefined when cookie not exists', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       headers: { cookie: 'foo=bar' },
     });
     assert(cookies.get('hello') === undefined);
   });
 
   it('should return undefined when signed and name.sig not exists', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       headers: { cookie: 'foo=bar;' },
     });
     assert(cookies.get('foo', { signed: true }) === undefined);
@@ -101,7 +101,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should set .sig to null if not match', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       headers: { cookie: 'foo=bar;foo.sig=bar.sig;' },
     });
     assert(cookies.get('foo', { signed: true }) === undefined);
@@ -109,13 +109,13 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should update .sig if not match the first key', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       headers: { cookie: 'foo=bar;foo.sig=bar.sig;' },
     }, { keys: [ 'hello', 'world' ] });
     cookies.set('foo', 'bar');
     const cookie = cookies.ctx.response.headers['set-cookie'].join(';');
 
-    const newCookies = new Cookies({
+    const newCookies = CreateCookie({
       headers: { cookie },
     }, { keys: [ 'hi', 'hello' ] });
 
@@ -125,53 +125,53 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should not overwrite default', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar');
     cookies.set('foo', 'hello');
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=bar/));
   });
 
   it('should overwrite when opts.overwrite = true', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', 'bar');
     cookies.set('foo', 'hello', { overwrite: true });
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=hello/));
   });
 
   it('should remove signed cookie ok', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', null, { signed: true });
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=; path=\/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly/));
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo\.sig=; path=\/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly/));
   });
 
   it('should remove encrypt cookie ok', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', null, { encrypt: true });
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=; path=\/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly/));
   });
 
   it('should remove cookie ok event it set maxAge', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.set('foo', null, { signed: true, maxAge: 1200 });
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=; path=\/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly/));
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo\.sig=; path=\/; expires=Thu, 01 Jan 1970 00:00:00 GMT; httponly/));
   });
 
   it('should add secure when ctx.secure = true', () => {
-    const cookies = new Cookies({}, { secure: true });
+    const cookies = CreateCookie({}, { secure: true });
     cookies.set('foo', 'bar');
     assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/secure;/));
   });
 
   it('should not add secure when ctx.secure = true but opt.secure = false', () => {
-    const cookies = new Cookies({}, { secure: true });
+    const cookies = CreateCookie({}, { secure: true });
     cookies.set('foo', 'bar', { secure: false });
     assert(!cookies.ctx.response.headers['set-cookie'].join(';').match(/secure;/));
   });
 
   it('should throw when ctx.secure = false but opt.secure = true', () => {
-    const cookies = new Cookies({}, { secure: false });
+    const cookies = CreateCookie({}, { secure: false });
     try {
       cookies.set('foo', 'bar', { secure: true });
       throw new Error('should not exec');
@@ -181,7 +181,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should set cookie success when set-cookie already exist', () => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     cookies.ctx.response.headers['set-cookie'] = 'foo=bar';
     cookies.set('foo1', 'bar1');
     assert(cookies.ctx.response.headers['set-cookie'][0] === 'foo=bar');
@@ -190,7 +190,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should emit cookieLimitExceed event in app when value\'s length exceed the limit', done => {
-    const cookies = new Cookies();
+    const cookies = CreateCookie();
     const value = Buffer.alloc(4094).fill(49).toString();
     cookies.app.on('cookieLimitExceed', params => {
       assert(params.name === 'foo');
@@ -206,10 +206,10 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should opts do not modify', () => {
-    const cookies = new Cookies({ secure: true });
+    const cookies = CreateCookie({ secure: true });
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -218,10 +218,10 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should defaultCookieOptions with sameSite=lax', () => {
-    const cookies = new Cookies({ secure: true }, null, { sameSite: 'lax' });
+    const cookies = CreateCookie({ secure: true }, null, { sameSite: 'lax' });
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -242,7 +242,7 @@ describe('test/lib/cookies.test.js', () => {
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML%2C like Gecko) Chrome/52.0.2723.2 Safari/537.36',
     ];
     for (const ua of userAgents) {
-      const cookies = new Cookies({
+      const cookies = CreateCookie({
         secure: true,
         headers: {
           'user-agent': ua,
@@ -250,7 +250,7 @@ describe('test/lib/cookies.test.js', () => {
       }, { secure: true }, { sameSite: 'None' });
       const opts = {
         signed: 1,
-      };
+      } as any;
       cookies.set('foo', 'hello', opts);
 
       assert(opts.signed === 1);
@@ -263,7 +263,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should send not SameSite=None property on Chrome < 80', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       secure: true,
       headers: {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.29 Safari/537.36',
@@ -271,7 +271,7 @@ describe('test/lib/cookies.test.js', () => {
     }, { secure: true }, { sameSite: 'None' });
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -283,7 +283,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should send not SameSite=None property on Chrome >= 80', () => {
-    let cookies = new Cookies({
+    let cookies = CreateCookie({
       secure: true,
       headers: {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3945.29 Safari/537.36',
@@ -291,7 +291,7 @@ describe('test/lib/cookies.test.js', () => {
     }, { secure: true }, { sameSite: 'None' });
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -301,7 +301,7 @@ describe('test/lib/cookies.test.js', () => {
       assert(str.includes('; path=/; samesite=none; secure; httponly'));
     }
 
-    cookies = new Cookies({
+    cookies = CreateCookie({
       secure: true,
       headers: {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.3945.29 Safari/537.36',
@@ -318,7 +318,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should send SameSite=none property on compatible clients', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       secure: true,
       headers: {
         'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_0 like Mac OS X) AppleWebKit/602.1.38 (KHTML, like Gecko) Version/66.6 Mobile/14A5297c Safari/602.1',
@@ -327,7 +327,7 @@ describe('test/lib/cookies.test.js', () => {
 
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -339,7 +339,7 @@ describe('test/lib/cookies.test.js', () => {
   });
 
   it('should not send SameSite=none property on non-secure context', () => {
-    const cookies = new Cookies({
+    const cookies = CreateCookie({
       secure: false,
       headers: {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.3945.29 Safari/537.36',
@@ -347,7 +347,7 @@ describe('test/lib/cookies.test.js', () => {
     }, null, { sameSite: 'none' });
     const opts = {
       signed: 1,
-    };
+    } as any;
     cookies.set('foo', 'hello', opts);
 
     assert(opts.signed === 1);
@@ -357,4 +357,12 @@ describe('test/lib/cookies.test.js', () => {
       assert(str.includes('; path=/; httponly'));
     }
   });
+
+  // it('should test base64encode', function () {
+  //   const text = base64encode('哈哈中文 ok', true);
+  //   const buf = base64decode(text, true, 'buffer');
+  //   expect(Buffer.isBuffer(buf)).toBeTruthy();
+  //   expect(buf.toString()).toEqual(base64decode(text, true));
+  //   expect(buf.toString()).toEqual(base64decode(text, true, 'utf8'));
+  // });
 });

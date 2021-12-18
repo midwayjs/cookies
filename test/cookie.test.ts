@@ -6,7 +6,7 @@ function assertExceptionCheck(expectedMsg) {
     return err.message === expectedMsg;
   };
 }
-describe('test/lib/cookie.test.js', () => {
+describe('test/cookie.test.ts', () => {
   it('create cookies contains invalid string error should throw', () => {
     assert.throws(() => new Cookie('中文', 'value'), assertExceptionCheck('argument name is invalid'));
     assert.throws(() => new Cookie('name', '中文'), assertExceptionCheck('argument value is invalid'));
@@ -75,7 +75,7 @@ describe('test/lib/cookie.test.js', () => {
     it('ignore maxage NaN', () => {
       const header = new Cookie('name', 'value', {
         secure: true,
-        maxAge: 'session',
+        maxAge: 'session' as any,
         domain: 'eggjs.org',
         path: '/',
         httpOnly: true,
@@ -114,7 +114,7 @@ describe('test/lib/cookie.test.js', () => {
       it('should not add "samesite" attribute in header', () => {
         const falsyValues = [ false, 0, '', null, undefined, NaN ];
         falsyValues.forEach(falsy => {
-          const cookie = new Cookie('foo', 'bar', { sameSite: falsy });
+          const cookie = new Cookie('foo', 'bar', { sameSite: falsy } as any);
           assert.ok(Object.is(cookie.attrs.sameSite, falsy));
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; httponly');
         });

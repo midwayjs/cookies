@@ -12,28 +12,41 @@ import { CookieOptions } from '.';
 const fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/; // eslint-disable-line no-control-regex
 
 /**
-* RegExp to match Same-Site cookie attribute value.
-* https://en.wikipedia.org/wiki/HTTP_cookie#SameSite_cookie
-*/
+ * RegExp to match Same-Site cookie attribute value.
+ * https://en.wikipedia.org/wiki/HTTP_cookie#SameSite_cookie
+ */
 
 const sameSiteRegExp = /^(?:none|lax|strict)$/i;
 
 export class Cookie {
-  
   public name: string;
   public value: string;
   public attrs: CookieOptions;
 
   constructor(name: string, value: string, attrs?: CookieOptions) {
     assert(fieldContentRegExp.test(name), 'argument name is invalid');
-    assert(!value || fieldContentRegExp.test(value), 'argument value is invalid');
+    assert(
+      !value || fieldContentRegExp.test(value),
+      'argument value is invalid'
+    );
 
     this.name = name;
     this.value = value || '';
     this.attrs = mergeDefaultAttrs(attrs);
-    assert(!this.attrs.path || fieldContentRegExp.test(this.attrs.path), 'argument option path is invalid');
-    assert(!this.attrs.domain || fieldContentRegExp.test(this.attrs.domain), 'argument option domain is invalid');
-    assert(!this.attrs.sameSite || this.attrs.sameSite === true || sameSiteRegExp.test(this.attrs.sameSite), 'argument option sameSite is invalid');
+    assert(
+      !this.attrs.path || fieldContentRegExp.test(this.attrs.path),
+      'argument option path is invalid'
+    );
+    assert(
+      !this.attrs.domain || fieldContentRegExp.test(this.attrs.domain),
+      'argument option domain is invalid'
+    );
+    assert(
+      !this.attrs.sameSite ||
+        this.attrs.sameSite === true ||
+        sameSiteRegExp.test(this.attrs.sameSite),
+      'argument option sameSite is invalid'
+    );
     if (!value) {
       this.attrs.expires = new Date(0);
       // make sure maxAge is empty
@@ -49,7 +62,10 @@ export class Cookie {
     let header = this.toString();
     const attrs = this.attrs;
     if (attrs.path) header += '; path=' + attrs.path;
-    const maxAge = typeof attrs.maxAge === 'string' ? parseInt(attrs.maxAge, 10): attrs.maxAge;
+    const maxAge =
+      typeof attrs.maxAge === 'string'
+        ? parseInt(attrs.maxAge, 10)
+        : attrs.maxAge;
     // ignore 0, `session` and other invalid maxAge
     if (maxAge) {
       header += '; max-age=' + Math.round(maxAge / 1000);
@@ -57,7 +73,10 @@ export class Cookie {
     }
     if (attrs.expires) header += '; expires=' + attrs.expires.toUTCString();
     if (attrs.domain) header += '; domain=' + attrs.domain;
-    if (attrs.sameSite) header += '; samesite=' + (attrs.sameSite === true ? 'strict' : attrs.sameSite.toLowerCase());
+    if (attrs.sameSite)
+      header +=
+        '; samesite=' +
+        (attrs.sameSite === true ? 'strict' : attrs.sameSite.toLowerCase());
     if (attrs.secure) header += '; secure';
     if (attrs.httpOnly) header += '; httponly';
 
@@ -65,7 +84,16 @@ export class Cookie {
   }
 }
 
-const ATTRS = [ 'path', 'expires', 'domain', 'httpOnly', 'secure', 'maxAge', 'overwrite', 'sameSite' ];
+const ATTRS = [
+  'path',
+  'expires',
+  'domain',
+  'httpOnly',
+  'secure',
+  'maxAge',
+  'overwrite',
+  'sameSite',
+];
 function mergeDefaultAttrs(attrs) {
   const merged = {
     path: '/',

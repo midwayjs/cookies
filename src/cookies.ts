@@ -12,10 +12,10 @@ const keyCache = new Map();
  * cookies extend pillarjs/cookies, add encrypt and decrypt
  */
 export class Cookies {
-  private _defaultCookieOptions;
-  private ctx;
-  private secure;
-  private app;
+  private readonly _defaultCookieOptions;
+  public ctx;
+  public secure;
+  public app;
 
   constructor(ctx, keys, defaultCookieOptions?) {
     this[KEYS_ARRAY] = keys;
@@ -29,7 +29,10 @@ export class Cookies {
   get keys() {
     if (!this[KEYS]) {
       const keysArray = this[KEYS_ARRAY];
-      assert(Array.isArray(keysArray), '.keys required for encrypt/sign cookies');
+      assert(
+        Array.isArray(keysArray),
+        '.keys required for encrypt/sign cookies'
+      );
       const cache = keyCache.get(keysArray);
       if (cache) {
         this[KEYS] = cache;
@@ -48,7 +51,7 @@ export class Cookies {
    * @param opts Optional. The options for cookie's getting.
    * @returns The cookie's value according to the specific name.
    */
-  get(name, opts: CookieGetOptions) {
+  public get(name: string, opts?: CookieGetOptions) {
     opts = opts || {};
     const signed = computeSigned(opts);
 
@@ -82,7 +85,7 @@ export class Cookies {
     }
 
     // encrypt
-    value = base64decode(value, true, 'buffer');
+    value = urlSafeDecode(value);
     const res = this.keys.decrypt(value);
     return res ? res.value.toString() : undefined;
   }
@@ -94,7 +97,7 @@ export class Cookies {
    * @param opts Optional. The options for cookie's setting.
    * @returns The current 'Cookie' instance.
    */
-  set(name, value, opts?: CookieSetOptions) {
+  public set(name: string, value, opts?: CookieSetOptions) {
     opts = Object.assign({}, this._defaultCookieOptions, opts);
     const signed = computeSigned(opts);
     value = value || '';
@@ -103,11 +106,11 @@ export class Cookies {
     }
 
     let headers = this.ctx.response.get('set-cookie') || [];
-    if (!Array.isArray(headers)) headers = [ headers ];
+    if (!Array.isArray(headers)) headers = [headers];
 
     // encrypt
     if (opts.encrypt) {
-      value = value && base64encode(this.keys.encrypt(value), true);
+      value = value && urlSafeEncode(this.keys.encrypt(value));
     }
 
     // http://browsercookielimits.squawky.net/
@@ -117,9 +120,16 @@ export class Cookies {
 
     // https://github.com/linsight/should-send-same-site-none
     // fixed SameSite=None: Known Incompatible Clients
-    if (opts.sameSite && typeof opts.sameSite === 'string' && opts.sameSite.toLowerCase() === 'none') {
+    if (
+      opts.sameSite &&
+      typeof opts.sameSite === 'string' &&
+      opts.sameSite.toLowerCase() === 'none'
+    ) {
       const userAgent = this.ctx.get('user-agent');
-      if (!this.secure || (userAgent && !this.isSameSiteNoneCompatible(userAgent))) {
+      if (
+        !this.secure ||
+        (userAgent && !this.isSameSiteNoneCompatible(userAgent))
+      ) {
         // Non-secure context or Incompatible clients, don't send SameSite=None property
         opts.sameSite = false;
       }
@@ -143,7 +153,7 @@ export class Cookies {
     return this;
   }
 
-  isSameSiteNoneCompatible(userAgent) {
+  protected isSameSiteNoneCompatible(userAgent) {
     // Chrome >= 80.0.0.0
     const result = parseChromiumAndMajorVersion(userAgent);
     if (result.chromium) return result.majorVersion >= 80;
@@ -153,22 +163,20 @@ export class Cookies {
 
 // https://github.com/linsight/should-send-same-site-none/blob/master/index.js#L86
 function parseChromiumAndMajorVersion(userAgent) {
-  const m = /Chrom[^ \/]+\/(\d+)[\.\d]* /.exec(userAgent);
+  const m = /Chrom[^ /]+\/(\d+)[.\d]* /.exec(userAgent);
   if (!m) return { chromium: false, version: null };
   // Extract digits from first capturing group.
   return { chromium: true, majorVersion: parseInt(m[1]) };
 }
 
-const partternCache = new Map();
+const patternCache = new Map();
 function getPattern(name) {
-  const cache = partternCache.get(name);
+  const cache = patternCache.get(name);
   if (cache) return cache;
   const reg = new RegExp(
-    '(?:^|;) *' +
-    name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') +
-    '=([^;]*)'
+    '(?:^|;) *' + name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '=([^;]*)'
   );
-  partternCache.set(name, reg);
+  patternCache.set(name, reg);
   return reg;
 }
 
@@ -187,25 +195,10 @@ function pushCookie(cookies, cookie) {
   return cookies;
 }
 
+export function urlSafeEncode(encode: string): string {
+  return encode.replace(/\+/g, '-').replace(/\//g, '_');
+}
 
-function base64encode(s, urlsafe) {
-  if (!Buffer.isBuffer(s)) {
-    s = typeof Buffer.from === 'function' ? Buffer.from(s) : new Buffer(s);
-  }
-  var encode = s.toString('base64');
-  if (urlsafe) {
-    encode = encode.replace(/\+/g, '-').replace(/\//g, '_');
-  }
-  return encode;
-};
-
-function base64decode(encodeStr, urlsafe, encoding) {
-  if (urlsafe) {
-    encodeStr = encodeStr.replace(/\-/g, '+').replace(/_/g, '/');
-  }
-  var buf = typeof Buffer.from === 'function' ? Buffer.from(encodeStr, 'base64') : new Buffer(encodeStr, 'base64');
-  if (encoding === 'buffer') {
-    return buf;
-  }
-  return buf.toString(encoding || 'utf8');
-};
+export function urlSafeDecode(encodeStr) {
+  return encodeStr.replace(/-/g, '+').replace(/_/g, '/');
+}
