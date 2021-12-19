@@ -106,7 +106,7 @@ describe('test/cookie.test.ts', () => {
 
     it('should throw on invalid value', () => {
       assert.throws(() => {
-        new Cookie('foo', 'bar', { sameSite: 'foo' });
+        new Cookie('foo', 'bar', { sameSite: 'foo' } as any);
       }, /argument option sameSite is invalid/);
     });
 
@@ -136,7 +136,7 @@ describe('test/cookie.test.ts', () => {
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=none; httponly');
         }
         {
-          const cookie = new Cookie('foo', 'bar', { sameSite: 'None' });
+          const cookie = new Cookie('foo', 'bar', { sameSite: 'None' } as any);
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=none; httponly');
         }
       });
@@ -149,7 +149,7 @@ describe('test/cookie.test.ts', () => {
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=lax; httponly');
         }
         {
-          const cookie = new Cookie('foo', 'bar', { sameSite: 'Lax' });
+          const cookie = new Cookie('foo', 'bar', { sameSite: 'Lax' } as any);
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=lax; httponly');
         }
       });
@@ -162,7 +162,7 @@ describe('test/cookie.test.ts', () => {
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=strict; httponly');
         }
         {
-          const cookie = new Cookie('foo', 'bar', { sameSite: 'Strict' });
+          const cookie = new Cookie('foo', 'bar', { sameSite: 'Strict' } as any);
           assert.equal(cookie.toHeader(), 'foo=bar; path=/; samesite=strict; httponly');
         }
       });
