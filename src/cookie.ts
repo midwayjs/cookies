@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { CookieOptions } from '.';
+import { CookieSetOptions } from '.';
 
 /**
  * RegExp to match field-content in RFC 7230 sec 3.2
@@ -17,6 +17,8 @@ const fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/; // eslint-di
  */
 
 const sameSiteRegExp = /^(?:none|lax|strict)$/i;
+
+type CookieOptions = Omit<CookieSetOptions, 'encrypt'>;
 
 export class Cookie {
   public name: string;

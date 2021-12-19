@@ -365,4 +365,13 @@ describe('test/cookies.test.ts', () => {
   //   expect(buf.toString()).toEqual(base64decode(text, true));
   //   expect(buf.toString()).toEqual(base64decode(text, true, 'utf8'));
   // });
+
+  it('should set cookie success when value is empty', () => {
+    const cookies = CreateCookie();
+    cookies.ctx.response.headers['set-cookie'] = 'foo=bar';
+    cookies.set('foo', {
+      signed: false,
+    });
+    assert(cookies.ctx.response.headers['set-cookie'][0] === 'foo=bar');
+  });
 });

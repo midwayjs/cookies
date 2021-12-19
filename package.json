@@ -3,7 +3,7 @@
   "description": "midway cookies",
   "version": "1.0.0",
   "main": "dist/index",
-  "typings": "index.d.ts",
+  "typings": "dist/index.d.ts",
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts"

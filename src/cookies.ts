@@ -17,7 +17,7 @@ export class Cookies {
   public secure;
   public app;
 
-  constructor(ctx, keys, defaultCookieOptions?) {
+  constructor(ctx, keys, defaultCookieOptions?: CookieSetOptions) {
     this[KEYS_ARRAY] = keys;
     // default cookie options
     this._defaultCookieOptions = defaultCookieOptions;
@@ -46,12 +46,14 @@ export class Cookies {
   }
 
   /**
-   * Get the cookies by name with optional options.
+   * This extracts the cookie with the given name from the
+   * Cookie header in the request. If such a cookie exists,
+   * its value is returned. Otherwise, nothing is returned.
    * @param name The cookie's unique name.
    * @param opts Optional. The options for cookie's getting.
    * @returns The cookie's value according to the specific name.
    */
-  public get(name: string, opts?: CookieGetOptions) {
+  public get(name: string, opts?: CookieGetOptions): string | undefined {
     opts = opts || {};
     const signed = computeSigned(opts);
 
@@ -91,13 +93,21 @@ export class Cookies {
   }
 
   /**
-   * Set the cookies by name with optional options.
+   * This sets the given cookie in the response and returns
+   * the current context to allow chaining.If the value is omitted,
+   * an outbound header with an expired date is used to delete the cookie.
    * @param name The cookie's unique name.
    * @param value Optional. The cookie's real value.
    * @param opts Optional. The options for cookie's setting.
    * @returns The current 'Cookie' instance.
    */
-  public set(name: string, value, opts?: CookieSetOptions) {
+  public set(name: string, value: string, opts?: CookieSetOptions): this;
+  public set(name: string, opts?: CookieSetOptions): this;
+  public set(name: string, value?: any, opts?: any): this {
+    if (!opts && typeof value !== 'string') {
+      opts = value;
+      value = '';
+    }
     opts = Object.assign({}, this._defaultCookieOptions, opts);
     const signed = computeSigned(opts);
     value = value || '';
