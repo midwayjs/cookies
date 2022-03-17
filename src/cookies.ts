@@ -89,7 +89,10 @@ export class Cookies {
     // encrypt
     value = urlSafeDecode(value);
     const res = this.keys.decrypt(value);
-    return res ? res.value.toString() : undefined;
+    if (res?.value) {
+      return res.value.toString();
+    }
+    return undefined;
   }
 
   /**
