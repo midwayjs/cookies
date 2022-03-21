@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import { Cookies } from '../src';
 import { CreateCookie } from './util';
 
 describe('test/cookies.test.ts', () => {
@@ -374,4 +375,19 @@ describe('test/cookies.test.ts', () => {
     });
     assert(cookies.ctx.response.headers['set-cookie'][0] === 'foo=bar');
   });
+
+  it('test secret options', () => {
+    const cookies = new Cookies({}, 'abc', {
+      secure: true,
+    });
+    const cookies1 = new Cookies({secure: true}, 'abc', {
+      secure: false,
+    });
+    const cookies2 = new Cookies({secure: false}, 'abc', {
+      secure: true,
+    });
+    assert.ok(cookies.secure);
+    assert.ok(cookies1.secure === false);
+    assert.ok(cookies2.secure === true);
+  })
 });

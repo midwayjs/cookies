@@ -22,7 +22,7 @@ export class Cookies {
     // default cookie options
     this._defaultCookieOptions = defaultCookieOptions;
     this.ctx = ctx;
-    this.secure = this.ctx.secure;
+    this.secure = defaultCookieOptions?.secure ?? this.ctx.secure;
     this.app = ctx.app;
   }
 
