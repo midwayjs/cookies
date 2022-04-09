@@ -3,6 +3,7 @@ import { Cookie } from './cookie';
 import { CookieGetOptions, CookieSetOptions } from './interface';
 import { Keygrip } from './keygrip';
 import { isSameSiteNoneCompatible as _isSameSiteNoneCompatible } from 'should-send-same-site-none';
+import { IncomingMessage, ServerResponse } from 'http';
 
 const KEYS_ARRAY = Symbol('midwayCookies:keysArray');
 const KEYS = Symbol('midwayCookies:keys');
@@ -16,6 +17,8 @@ export class Cookies {
   public ctx;
   public secure;
   public app;
+  public request: IncomingMessage;
+  public response: ServerResponse;
 
   constructor(ctx, keys, defaultCookieOptions?: CookieSetOptions) {
     this[KEYS_ARRAY] = keys;
