@@ -1,7 +1,7 @@
 {
   "name": "@midwayjs/cookies",
   "description": "midway cookies",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "dist/index",
   "typings": "dist/index.d.ts",
   "files": [
