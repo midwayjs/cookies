@@ -21,7 +21,7 @@ export class Cookies {
   public response: ServerResponse;
 
   constructor(ctx, keys, defaultCookieOptions?: CookieSetOptions) {
-    this[KEYS_ARRAY] = keys;
+    this[KEYS_ARRAY] = keys ? [].concat(keys): keys;
     // default cookie options
     this._defaultCookieOptions = defaultCookieOptions;
     this.ctx = ctx;

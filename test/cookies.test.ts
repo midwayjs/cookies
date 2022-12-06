@@ -13,6 +13,11 @@ describe('test/cookies.test.ts', () => {
     }
   });
 
+  it('should encrypt support string keys', () => {
+    const cookies = CreateCookie({}, { keys: 'abc' });
+    cookies.set('foo', 'bar', { encrypt: true });
+  });
+
   it('should not thrown when keys not present and do not use encrypt or sign', () => {
     const cookies = CreateCookie({}, { keys: null });
     cookies.set('foo', 'bar', { encrypt: false, signed: false });
@@ -30,7 +35,7 @@ describe('test/cookies.test.ts', () => {
 
   it('should cache eygrip', () => {
     const keys = [ 'key' ];
-    assert(CreateCookie({}, { keys }).keys === CreateCookie({}, { keys }).keys); // eslint-disable-line no-self-compare
+    assert(JSON.stringify(CreateCookie({}, { keys }).keys) == JSON.stringify(CreateCookie({}, { keys }).keys)); // eslint-disable-line no-self-compare
   });
 
   it('should encrypt failed return undefined', () => {
