@@ -14,6 +14,7 @@ const keyCache = new Map();
  */
 export class Cookies {
   private readonly _defaultCookieOptions;
+  private uaParseResult: { chromium: boolean; majorVersion: number };
   public ctx;
   public secure;
   public app;
@@ -107,9 +108,9 @@ export class Cookies {
    * @param opts Optional. The options for cookie's setting.
    * @returns The current 'Cookie' instance.
    */
-  public set(name: string, value: string, opts?: CookieSetOptions): this;
+  public set(name: string, value: string | null, opts?: CookieSetOptions): this;
   public set(name: string, opts?: CookieSetOptions): this;
-  public set(name: string, value?: any, opts?: any): this {
+  public set(name: string, value?: any, opts?: CookieSetOptions): this {
     if (!opts && typeof value !== 'string') {
       opts = value;
       value = '';
@@ -136,18 +137,28 @@ export class Cookies {
 
     // https://github.com/linsight/should-send-same-site-none
     // fixed SameSite=None: Known Incompatible Clients
+    const userAgent = this.ctx.get('user-agent');
     if (
       opts.sameSite &&
       typeof opts.sameSite === 'string' &&
       opts.sameSite.toLowerCase() === 'none'
     ) {
-      const userAgent = this.ctx.get('user-agent');
       if (
         !this.secure ||
         (userAgent && !this.isSameSiteNoneCompatible(userAgent))
       ) {
         // Non-secure context or Incompatible clients, don't send SameSite=None property
         opts.sameSite = false;
+      }
+    }
+
+    if (opts.partitioned) {
+      if (
+        !this.secure ||
+        (userAgent && !this.isPartitionedCompatible(userAgent))
+      ) {
+        // ignore partitioned when not secure or incompatible clients
+        opts.partitioned = false;
       }
     }
 
@@ -169,20 +180,39 @@ export class Cookies {
     return this;
   }
 
-  protected isSameSiteNoneCompatible(userAgent) {
+  protected isSameSiteNoneCompatible(userAgent: string) {
     // Chrome >= 80.0.0.0
-    const result = parseChromiumAndMajorVersion(userAgent);
-    if (result.chromium) return result.majorVersion >= 80;
+    const result = this.parseChromiumAndMajorVersion(userAgent);
+    if (result.chromium && result.majorVersion) {
+      return result.majorVersion >= 80;
+    }
     return _isSameSiteNoneCompatible(userAgent);
   }
-}
 
-// https://github.com/linsight/should-send-same-site-none/blob/master/index.js#L86
-function parseChromiumAndMajorVersion(userAgent) {
-  const m = /Chrom[^ /]+\/(\d+)[.\d]* /.exec(userAgent);
-  if (!m) return { chromium: false, version: null };
-  // Extract digits from first capturing group.
-  return { chromium: true, majorVersion: parseInt(m[1]) };
+  protected isPartitionedCompatible(userAgent: string) {
+    // Chrome & Edge >= 114.0.0.0
+    // https://developers.google.com/privacy-sandbox/3pcd/chips
+    const result = this.parseChromiumAndMajorVersion(userAgent);
+    if (result.chromium && result.majorVersion) {
+      return result.majorVersion >= 114;
+    }
+    return false;
+  }
+
+  protected parseChromiumAndMajorVersion(userAgent): {
+    chromium: boolean;
+    majorVersion: number;
+  } {
+    // https://github.com/linsight/should-send-same-site-none/blob/master/index.js#L86
+    if (!this.uaParseResult) {
+      const m = /Chrom[^ /]+\/(\d+)[.\d]* /.exec(userAgent);
+      if (!m) return { chromium: false, majorVersion: undefined };
+      // Extract digits from first capturing group.
+      this.uaParseResult = { chromium: true, majorVersion: parseInt(m[1]) };
+    }
+
+    return this.uaParseResult;
+  }
 }
 
 const patternCache = new Map();

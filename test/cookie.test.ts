@@ -15,7 +15,7 @@ describe('test/cookie.test.ts', () => {
   });
 
   it('set expires to 0 if value not present', () => {
-    assert(new Cookie('name', null).attrs.expires.getTime() === 0);
+    assert(new Cookie('name', null)?.attrs?.expires?.getTime() === 0);
   });
 
   describe('toString()', () => {

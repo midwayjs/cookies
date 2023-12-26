@@ -25,7 +25,11 @@ export class Cookie {
   public value: string;
   public attrs: CookieOptions;
 
-  constructor(name: string, value: string, attrs?: CookieOptions) {
+  constructor(
+    name: string,
+    value: string | undefined | null,
+    attrs?: CookieOptions
+  ) {
     assert(fieldContentRegExp.test(name), 'argument name is invalid');
     assert(
       !value || fieldContentRegExp.test(value),
@@ -81,6 +85,8 @@ export class Cookie {
         (attrs.sameSite === true ? 'strict' : attrs.sameSite.toLowerCase());
     if (attrs.secure) header += '; secure';
     if (attrs.httpOnly) header += '; httponly';
+    if (attrs.priority) header += '; priority=' + attrs.priority;
+    if (attrs.partitioned) header += '; partitioned';
 
     return header;
   }
@@ -92,9 +98,11 @@ const ATTRS = [
   'domain',
   'httpOnly',
   'secure',
+  'partitioned',
   'maxAge',
   'overwrite',
   'sameSite',
+  'priority',
 ];
 function mergeDefaultAttrs(attrs) {
   const merged = {
@@ -103,6 +111,7 @@ function mergeDefaultAttrs(attrs) {
     secure: false,
     overwrite: false,
     sameSite: false,
+    partitioned: false,
   };
   if (!attrs) return merged;
 
