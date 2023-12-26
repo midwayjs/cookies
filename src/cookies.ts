@@ -155,10 +155,18 @@ export class Cookies {
     if (opts.partitioned) {
       if (
         !this.secure ||
+        !userAgent ||
         (userAgent && !this.isPartitionedCompatible(userAgent))
       ) {
         // ignore partitioned when not secure or incompatible clients
         opts.partitioned = false;
+      }
+    }
+
+    if (opts.priority) {
+      if (!userAgent || (userAgent && !this.isPriorityCompatible(userAgent))) {
+        // ignore priority when not secure or incompatible clients
+        opts.priority = undefined;
       }
     }
 
@@ -212,6 +220,16 @@ export class Cookies {
     }
 
     return this.uaParseResult;
+  }
+
+  protected isPriorityCompatible(userAgent: string) {
+    // Chrome >= 81.0.0.0
+    // https://developer.chrome.com/blog/new-in-devtools-81?hl=zh-cn#cookiepriority
+    const result = this.parseChromiumAndMajorVersion(userAgent);
+    if (result.chromium && result.majorVersion) {
+      return result.majorVersion >= 81;
+    }
+    return false;
   }
 }
 

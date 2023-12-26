@@ -394,9 +394,48 @@ describe('test/cookies.test.ts', () => {
     assert.ok(cookies.secure);
     assert.ok(cookies1.secure === false);
     assert.ok(cookies2.secure === true);
-  })
+  });
+
+  describe('opts.priority', () => {
+
+    it('should test priority options when ua is empty', () => {
+      const cookies = CreateCookie();
+      cookies.set('foo', 'bar', { priority: 'High' });
+      assert(!cookies.ctx.response.headers['set-cookie'][0].includes('priority=High'));
+    });
+
+    it('should test priority options when ua is chrome low version', () => {
+      const cookies = CreateCookie({
+        headers: {
+          'user-agent': 'Mozilla/5.0 (Linux; Android 4.4.4; SM-G530H Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.108 Mobile Safari/537.36',
+        },
+      });
+      cookies.set('foo', 'bar', { priority: 'High' });
+      assert(!cookies.ctx.response.headers['set-cookie'][0].includes('priority=High'));
+    });
+
+
+    it('should test priority options when ua is chrome high version', () => {
+      const cookies = CreateCookie({
+        headers: {
+          'user-agent': 'Mozilla/5.0 (Linux; Android 4.4.4; SM-G530H Build/KTU84P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.2987.108 Mobile Safari/537.36',
+        },
+      });
+      cookies.set('foo', 'bar', { priority: 'High' });
+      assert(cookies.ctx.response.headers['set-cookie'][0].includes('priority=High'));
+    });
+  });
 
   describe('opts.partitioned', () => {
+
+    it('should test partitioned options when ua is empty', () => {
+      const cookies = CreateCookie({
+        secure: true,
+      }, { secure: true });
+      cookies.set('foo', 'bar', { signed: true, partitioned: true });
+      assert(!cookies.ctx.response.headers['set-cookie'][0].includes('partitioned'));
+    });
+
     it('should not send partitioned property on incompatible clients', () => {
       const userAgents = [
         'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML%2C like Gecko) Chrome/64.0.3282.140 Safari/537.36',
@@ -494,7 +533,8 @@ describe('test/cookies.test.ts', () => {
       assert(opts.secure === undefined);
       assert(cookies.ctx.response.headers['set-cookie'].join(';').match(/foo=hello/));
       for (const str of cookies.ctx.response.headers['set-cookie']) {
-        assert(str.includes('; path=/; secure; httponly; partitioned'));
+        assert(str.includes('path=/; secure; httponly'));
+        assert(!str.includes('; path=/; secure; httponly; partitioned'));
       }
     });
 
