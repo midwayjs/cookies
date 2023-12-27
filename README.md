@@ -30,6 +30,7 @@ Set a cookie through `cookies.set(key, value, options)`. The parameters supporte
 - overwrite - `Boolean` If set to true, repeatedly writing the same key on a request will overwrite the previous value written, the default is false.
 - signed - Whether `Boolean` needs to sign the cookie or not, the signed parameter needs to be passed when cooperating with get. At this time, the front-end cannot tamper with the cookie. The default is true.
 - encrypt - Whether `Boolean` needs to encrypt the cookie, you need to pass the encrypt parameter when using get. At this time, the front-end cannot read the real cookie value, and the default is false.
+- partitioned - Whether `Boolean` sets cookies for independent partition state ([CHIPS](https://developers.google.com/privacy-sandbox/3pcd/chips)). Note that this configuration will only take effect if 'secure' is true.
 
 ## Read cookie
 
