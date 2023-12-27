@@ -67,7 +67,7 @@ export interface CookieSetOptions {
    * only supported in chrome 81+.
    * https://developer.chrome.com/blog/new-in-devtools-81?hl=zh-cn#cookiepriority
    */
-  priority?: 'low' | 'medium' | 'high' | 'Low' | 'Medium' | 'High';
+  priority?: 'Low' | 'Medium' | 'High';
   /**
    * a boolean indicating whether to partition the cookie in Chrome for the CHIPS Update，false by default.
    * If this is true, Cookies from embedded sites will be partitioned and only readable from the same top level site from which it was created.
