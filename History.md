@@ -1,4 +1,11 @@
 
+1.1.0 / 2023-12-27
+==================
+
+  * chore: update doc and interface
+  * feat: support partitioned property for new chrome (#8)
+  * chore(deps): add renovate.json (#3)
+
 1.0.5 / 2022-12-06
 ==================
 
