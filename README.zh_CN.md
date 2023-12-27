@@ -37,7 +37,7 @@ ctx.cookies.get('foo', { encrypt: true });
 - signed - `Boolean` 是否需要对 cookie 进行签名，需要配合 get 时传递 signed 参数，此时前端无法篡改这个 cookie，默认为 true。
 - encrypt - `Boolean` 是否需要对 cookie 进行加密，需要配合 get 时传递 encrypt 参数，此时前端无法读到真实的 cookie 值，默认为 false。
 - partitioned - `Boolean` 是否设置独立分区状态（[CHIPS](https://developers.google.com/privacy-sandbox/3pcd/chips)）的 Cookie。注意，只有 `secure` 为 true 的时候此配置才会生效。
-- priority - 'String' 设置 cookie 的 [优先级](https://developer.chrome.com/blog/new-in-devtools-81?hl=zh-cn#cookiepriority)，可选值为 `Low`、`Medium`、`High`，仅对 Chrome >= 81 版本有效。
+- priority - `String` 设置 cookie 的 [优先级](https://developer.chrome.com/blog/new-in-devtools-81?hl=zh-cn#cookiepriority)，可选值为 `Low`、`Medium`、`High`，仅对 Chrome >= 81 版本有效。
 
 ## 读取 cookie
 
