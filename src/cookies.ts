@@ -163,6 +163,30 @@ export class Cookies {
       }
     }
 
+    // remove unpartitioned same name cookie first
+    if (opts.partitioned && opts.removeUnpartitioned) {
+      const overwrite = opts.overwrite;
+      if (overwrite) {
+        opts.overwrite = false;
+        headers = ignoreCookiesByName(headers, name);
+      }
+      const removeCookieOpts = Object.assign({}, opts, {
+        partitioned: false,
+      });
+      const removeUnpartitionedCookie = new Cookie(name, '', removeCookieOpts);
+      // if user not set secure, reset secure to ctx.secure
+      if (opts.secure === undefined)
+        removeUnpartitionedCookie.attrs.secure = this.secure;
+
+      headers = pushCookie(headers, removeUnpartitionedCookie);
+      // signed
+      if (signed) {
+        removeUnpartitionedCookie.name += '.sig';
+        headers = ignoreCookiesByName(headers, removeUnpartitionedCookie.name);
+        headers = pushCookie(headers, removeUnpartitionedCookie);
+      }
+    }
+
     if (opts.priority) {
       if (!userAgent || (userAgent && !this.isPriorityCompatible(userAgent))) {
         // ignore priority when not secure or incompatible clients
@@ -253,10 +277,15 @@ function computeSigned(opts) {
 
 function pushCookie(cookies, cookie) {
   if (cookie.attrs.overwrite) {
-    cookies = cookies.filter(c => !c.startsWith(cookie.name + '='));
+    cookies = ignoreCookiesByName(cookies, cookie.name);
   }
   cookies.push(cookie.toHeader());
   return cookies;
+}
+
+function ignoreCookiesByName(cookies, name) {
+  const prefix = `${name}=`;
+  return cookies.filter(c => !c.startsWith(prefix));
 }
 
 export function urlSafeEncode(encode: string): string {
