@@ -1,4 +1,10 @@
 
+1.2.0 / 2023-12-28
+==================
+
+  * feat: add removeUnpartitioned property (#9)
+  * docs: update typo
+
 1.1.0 / 2023-12-27
 ==================
 
