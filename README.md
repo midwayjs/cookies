@@ -31,6 +31,7 @@ Set a cookie through `cookies.set(key, value, options)`. The parameters supporte
 - signed - Whether `Boolean` needs to sign the cookie or not, the signed parameter needs to be passed when cooperating with get. At this time, the front-end cannot tamper with the cookie. The default is true.
 - encrypt - Whether `Boolean` needs to encrypt the cookie, you need to pass the encrypt parameter when using get. At this time, the front-end cannot read the real cookie value, and the default is false.
 - partitioned - Whether `Boolean` sets cookies for independent partition state ([CHIPS](https://developers.google.com/privacy-sandbox/3pcd/chips)). Note that this configuration will only take effect if 'secure' is true.
+- removeUnpartitioned - `Boolean` Whether to delete the cookie with the same name in the non-independent partition state. Note that this configuration will only take effect when `partitioned` is true.
 - priority - `String` sets the [priority of the cookie](https://developer.chrome.com/blog/new-in-devtools-81?hl=zh-cn#cookiepriority), the optional value is `Low` , `Medium`, `High`, only valid for Chrome >= 81 version.
 
 ## Read cookie
