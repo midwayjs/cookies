@@ -13,7 +13,8 @@ const keyCache = new Map();
  * cookies extend pillarjs/cookies, add encrypt and decrypt
  */
 export class Cookies {
-  private readonly _defaultCookieOptions;
+  private readonly _defaultCookieOptions: CookieSetOptions;
+  private readonly _defaultGetCookieOptions: CookieGetOptions;
   private uaParseResult: { chromium: boolean; majorVersion: number };
   public ctx;
   public secure;
@@ -21,10 +22,17 @@ export class Cookies {
   public request: IncomingMessage;
   public response: ServerResponse;
 
-  constructor(ctx, keys, defaultCookieOptions?: CookieSetOptions) {
+  constructor(
+    ctx,
+    keys,
+    defaultCookieOptions?: CookieSetOptions,
+    defaultGetCookieOptions?: CookieGetOptions
+  ) {
     this[KEYS_ARRAY] = keys ? [].concat(keys) : keys;
     // default cookie options
     this._defaultCookieOptions = defaultCookieOptions;
+    // default get cookie options
+    this._defaultGetCookieOptions = defaultGetCookieOptions;
     this.ctx = ctx;
     this.secure = defaultCookieOptions?.secure ?? this.ctx.secure;
     this.app = ctx.app;
@@ -58,7 +66,7 @@ export class Cookies {
    * @returns The cookie's value according to the specific name.
    */
   public get(name: string, opts?: CookieGetOptions): string | undefined {
-    opts = opts || {};
+    opts = Object.assign({}, this._defaultGetCookieOptions || {}, opts);
     const signed = computeSigned(opts);
 
     const header = this.ctx.get('cookie');

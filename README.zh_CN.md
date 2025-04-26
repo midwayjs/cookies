@@ -10,7 +10,7 @@
 
 ```ts
 import * as Cookies from '@midwayjs/cookies');
-ctx.cookies = new Cookies(ctx, keys[, defaultCookieOptions]);
+ctx.cookies = new Cookies(ctx, keys[, defaultCookieOptions[, defaultGetCookieOptions]]);
 ctx.cookies.set('foo', 'bar', { encrypt: true });
 ctx.cookies.get('foo', { encrypt: true });
 ```
@@ -46,6 +46,15 @@ ctx.cookies.get('foo', { encrypt: true });
 
 - signed - `Boolean` 是否需要对 cookie 进行验签，需要配合 set 时传递 signed 参数，此时前端无法篡改这个 cookie，默认为 true。
 - encrypt - `Boolean` 是否需要对 cookie 进行解密，需要配合 set 时传递 encrypt 参数，此时前端无法读到真实的 cookie 值，默认为 false。
+
+你也可以在初始化 Cookies 时通过 `defaultGetCookieOptions` 参数设置 `get` 方法的默认选项：
+
+```ts
+const cookies = new Cookies(ctx, keys, defaultCookieOptions, { signed: false });
+// 现在 cookies.get('foo') 将默认使用 signed: false
+```
+
+**⚠️ 安全警告：在 `defaultGetCookieOptions` 中设置 `signed: false` 是非常危险的行为，因为它会默认禁用 cookie 签名验证。这会使你的应用容易受到 cookie 篡改攻击。只有在完全理解安全影响并有特定原因需要禁用签名验证的情况下，才应该使用此选项。**
 
 ## 删除 cookie
 
