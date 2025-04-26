@@ -10,7 +10,7 @@ More encryption than the original version, using a more secure aes-256-gcm algor
 
 ```ts
 import * as Cookies from '@midwayjs/cookies');
-ctx.cookies = new Cookies(ctx, keys[, defaultCookieOptions]);
+ctx.cookies = new Cookies(ctx, keys[, defaultCookieOptions[, defaultGetCookieOptions]]);
 ctx.cookies.set('foo', 'bar', { encrypt: true });
 ctx.cookies.get('foo', { encrypt: true });
 ```
@@ -40,6 +40,15 @@ Read a cookie through `cookies.get(key, value, options)`. The parameters support
 
 - signed - Whether `Boolean` needs to verify the cookie, and pass the signed parameter when cooperating with the set. At this time, the front-end cannot tamper with the cookie. The default is true.
 - encrypt - Whether `Boolean` needs to decrypt the cookie, and pass the encrypt parameter when cooperating with the set. At this time, the front-end cannot read the real cookie value, and the default is false.
+
+You can also set default options for `get` method by passing `defaultGetCookieOptions` when initializing Cookies:
+
+```ts
+const cookies = new Cookies(ctx, keys, defaultCookieOptions, { signed: false });
+// Now cookies.get('foo') will use signed: false by default
+```
+
+**⚠️ Security Warning: Setting `signed: false` in `defaultGetCookieOptions` is dangerous as it disables cookie signature verification by default. This makes your application vulnerable to cookie tampering attacks. Only use this option if you fully understand the security implications and have a specific reason to disable signature verification.**
 
 ## Delete cookie
 
