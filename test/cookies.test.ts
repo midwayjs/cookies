@@ -106,6 +106,31 @@ describe('test/cookies.test.ts', () => {
     assert(cookies.get('foo') === undefined);
   });
 
+  it('should use defaultGetCookieOptions when getting cookie', () => {
+    const cookies = CreateCookie(
+      { headers: { cookie: 'foo=bar;' } },
+      { keys: ['key', 'keys'] },
+      { signed: false },
+      { signed: false }
+    );
+    
+    // 不传入 opts 时应该使用 defaultGetCookieOptions 的 signed: false
+    assert(cookies.get('foo') === 'bar');
+  });
+
+  it('should return undefined when default signed is true', () => {
+    const cookies = CreateCookie(
+      { headers: { cookie: 'foo=bar;' } },
+      { keys: ['key', 'keys'] }
+    );
+    
+    // 默认 signed 为 true，不传入 opts 时应该返回 undefined
+    assert(cookies.get('foo') === undefined);
+    
+    // 传入 signed: false 时应该能获取到值
+    assert(cookies.get('foo', { signed: false }) === 'bar');
+  });
+
   it('should set .sig to null if not match', () => {
     const cookies = CreateCookie({
       headers: { cookie: 'foo=bar;foo.sig=bar.sig;' },

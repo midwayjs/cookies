@@ -3,7 +3,7 @@ import { Cookies } from '../src';
 
 // This function creates a new instance of Cookie by mocking
 // a ctx there.
-export function CreateCookie(req?: any, options?: any, defaultCookieOptions?): Cookies {
+export function CreateCookie(req?: any, options?: any, defaultCookieOptions?: any, defaultGetCookieOptions?: any): Cookies {
   options = options || {};
   let keys = options.keys;
   keys = keys === undefined ? ['key', 'keys'] : keys;
@@ -30,7 +30,7 @@ export function CreateCookie(req?: any, options?: any, defaultCookieOptions?): C
 
   ctx.get = ctx.request.get.bind(ctx.request);
   ctx.set = ctx.response.set.bind(ctx.response);
-  return new Cookies(ctx, keys, defaultCookieOptions);
+  return new Cookies(ctx, keys, defaultCookieOptions, defaultGetCookieOptions);
 }
 
 // /**
